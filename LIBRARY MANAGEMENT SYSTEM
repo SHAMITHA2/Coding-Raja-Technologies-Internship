@@ -1,0 +1,190 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+class Book {
+    String title;
+    String author;
+    String genre;
+    boolean available;
+
+    Book(String title, String author, String genre) {
+        this.title = title;
+        this.author = author;
+        this.genre = genre;
+        this.available = true;
+    }
+}
+
+class Patron {
+    String name;
+    String contactInfo;
+    List<String> borrowingHistory;
+
+    Patron(String name, String contactInfo) {
+        this.name = name;
+        this.contactInfo = contactInfo;
+        this.borrowingHistory = new ArrayList<>();
+    }
+}
+
+class LibraryManagementSystem {
+    private Map<String, Book> books;
+    private Map<String, Patron> patrons;
+    private Scanner scanner;
+
+    LibraryManagementSystem() {
+        this.books = new HashMap<>();
+        this.patrons = new HashMap<>();
+        this.scanner = new Scanner(System.in);
+    }
+
+    private void addBook() {
+        System.out.println("Enter book title:");
+        String title = scanner.nextLine();
+
+        System.out.println("Enter author:");
+        String author = scanner.nextLine();
+
+        System.out.println("Enter genre:");
+        String genre = scanner.nextLine();
+
+        Book newBook = new Book(title, author, genre);
+        books.put(title, newBook);
+
+        System.out.println("Book added successfully!");
+    }
+
+    private void addPatron() {
+        System.out.println("Enter patron name:");
+        String name = scanner.nextLine();
+
+        System.out.println("Enter contact information:");
+        String contactInfo = scanner.nextLine();
+
+        Patron newPatron = new Patron(name, contactInfo);
+        patrons.put(name, newPatron);
+
+        System.out.println("Patron added successfully!");
+    }
+
+    private void borrowBook() {
+        System.out.println("Enter patron name:");
+        String patronName = scanner.nextLine();
+
+        System.out.println("Enter book title to borrow:");
+        String bookTitle = scanner.nextLine();
+
+        Patron patron = patrons.get(patronName);
+        Book book = books.get(bookTitle);
+
+        if (patron != null && book != null && book.available) {
+            book.available = false;
+            patron.borrowingHistory.add(bookTitle);
+
+            System.out.println("Book borrowed successfully!");
+        } else {
+            System.out.println("Invalid patron, book, or book not available.");
+        }
+    }
+
+    private void returnBook() {
+        System.out.println("Enter patron name:");
+        String patronName = scanner.nextLine();
+
+        System.out.println("Enter book title to return:");
+        String bookTitle = scanner.nextLine();
+
+        Patron patron = patrons.get(patronName);
+        Book book = books.get(bookTitle);
+
+        if (patron != null && book != null && !book.available && patron.borrowingHistory.contains(bookTitle)) {
+            book.available = true;
+            patron.borrowingHistory.remove(bookTitle);
+
+            System.out.println("Book returned successfully!");
+        } else {
+            System.out.println("Invalid patron, book, or book not borrowed by the patron.");
+        }
+    }
+
+    private void generateReports() {
+        System.out.println("\n===== Library Reports =====");
+        System.out.println("1. Book Availability");
+        System.out.println("2. Patron Borrowing History");
+        System.out.println("3. Exit");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume the newline character
+
+        switch (choice) {
+            case 1:
+                displayBookAvailability();
+                break;
+            case 2:
+                displayPatronBorrowingHistory();
+                break;
+            case 3:
+                System.out.println("Exiting...");
+                System.exit(0);
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+
+    private void displayBookAvailability() {
+        System.out.println("\n===== Book Availability =====");
+        books.forEach((title, book) -> System.out.println(title + ": " + (book.available ? "Available" : "Borrowed")));
+    }
+
+    private void displayPatronBorrowingHistory() {
+        System.out.println("\n===== Patron Borrowing History =====");
+        patrons.forEach((name, patron) -> {
+            System.out.println("Patron: " + name);
+            System.out.println("Borrowing History: " + patron.borrowingHistory);
+            System.out.println();
+        });
+    }
+
+    public static void main(String[] args) {
+        LibraryManagementSystem librarySystem = new LibraryManagementSystem();
+
+        while (true) {
+            System.out.println("\n===== Library Management System =====");
+            System.out.println("1. Add Book");
+            System.out.println("2. Add Patron");
+            System.out.println("3. Borrow Book");
+            System.out.println("4. Return Book");
+            System.out.println("5. Generate Reports");
+            System.out.println("6. Exit");
+
+            int choice = librarySystem.scanner.nextInt();
+            librarySystem.scanner.nextLine(); // Consume the newline character
+
+            switch (choice) {
+                case 1:
+                    librarySystem.addBook();
+                    break;
+                case 2:
+                    librarySystem.addPatron();
+                    break;
+                case 3:
+                    librarySystem.borrowBook();
+                    break;
+                case 4:
+                    librarySystem.returnBook();
+                    break;
+                case 5:
+                    librarySystem.generateReports();
+                    break;
+                case 6:
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
