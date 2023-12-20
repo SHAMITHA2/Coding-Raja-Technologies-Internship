@@ -1,0 +1,173 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+class User {
+    String username;
+    String password;
+    Map<String, Double> accounts;
+    List<String> transactionHistory;
+
+    User(String username, String password) {
+        this.username = username;
+        this.password = password;
+        this.accounts = new HashMap<>();
+        this.transactionHistory = new ArrayList<>();
+    }
+}
+
+class BankingSystem {
+    private Map<String, User> users;
+    private Scanner scanner;
+
+    BankingSystem() {
+        this.users = new HashMap<>();
+        this.scanner = new Scanner(System.in);
+    }
+
+    private void createUser() {
+        System.out.println("Enter your username:");
+        String username = scanner.nextLine();
+
+        System.out.println("Enter your password:");
+        String password = scanner.nextLine();
+
+        User newUser = new User(username, password);
+        users.put(username, newUser);
+
+        System.out.println("User created successfully!");
+    }
+
+    private User loginUser() {
+        System.out.println("Enter your username:");
+        String username = scanner.nextLine();
+
+        System.out.println("Enter your password:");
+        String password = scanner.nextLine();
+
+        User user = users.get(username);
+        if (user != null && user.password.equals(password)) {
+            return user;
+        } else {
+            System.out.println("Invalid credentials. Please try again.");
+            return null;
+        }
+    }
+
+    private void createAccount(User user) {
+        System.out.println("Enter account type (e.g., savings, checking):");
+        String accountType = scanner.nextLine();
+
+        System.out.println("Enter initial balance:");
+        double initialBalance = scanner.nextDouble();
+        scanner.nextLine(); // Consume the newline character
+
+        user.accounts.put(accountType, initialBalance);
+        System.out.println("Account created successfully!");
+    }
+
+    private void displayBalance(User user) {
+        System.out.println("Select account type to view balance:");
+        user.accounts.forEach((accountType, balance) -> System.out.println(accountType + ": " + balance));
+    }
+
+    private void transferFunds(User user) {
+        System.out.println("Enter source account type:");
+        String sourceAccount = scanner.nextLine();
+
+        System.out.println("Enter destination account type:");
+        String destinationAccount = scanner.nextLine();
+
+        System.out.println("Enter the amount to transfer:");
+        double amount = scanner.nextDouble();
+        scanner.nextLine(); // Consume the newline character
+
+        if (user.accounts.containsKey(sourceAccount) && user.accounts.containsKey(destinationAccount)) {
+            double sourceBalance = user.accounts.get(sourceAccount);
+            if (sourceBalance >= amount) {
+                user.accounts.put(sourceAccount, sourceBalance - amount);
+                user.accounts.put(destinationAccount, user.accounts.get(destinationAccount) + amount);
+
+                user.transactionHistory.add("Transfer: $" + amount + " from " + sourceAccount + " to " + destinationAccount);
+                System.out.println("Transfer successful!");
+            } else {
+                System.out.println("Insufficient funds in the source account.");
+            }
+        } else {
+            System.out.println("Invalid account types. Please check and try again.");
+        }
+    }
+
+    private void displayTransactionHistory(User user) {
+        System.out.println("Transaction History:");
+        user.transactionHistory.forEach(System.out::println);
+    }
+
+    public static void main(String[] args) {
+        BankingSystem bankingSystem = new BankingSystem();
+        User currentUser = null;
+
+        while (true) {
+            System.out.println("\n===== Online Banking System =====");
+            System.out.println("1. Create User");
+            System.out.println("2. Login");
+            System.out.println("3. Exit");
+
+            int choice = bankingSystem.scanner.nextInt();
+            bankingSystem.scanner.nextLine(); // Consume the newline character
+
+            switch (choice) {
+                case 1:
+                    bankingSystem.createUser();
+                    break;
+                case 2:
+                    currentUser = bankingSystem.loginUser();
+                    if (currentUser != null) {
+                        bankingSystem.handleUserActions(currentUser);
+                    }
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private void handleUserActions(User user) {
+        while (true) {
+            System.out.println("\n===== Welcome, " + user.username + "! =====");
+            System.out.println("1. Create Account");
+            System.out.println("2. Display Balance");
+            System.out.println("3. Transfer Funds");
+            System.out.println("4. Transaction History");
+            System.out.println("5. Logout");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume the newline character
+
+            switch (choice) {
+                case 1:
+                    createAccount(user);
+                    break;
+                case 2:
+                    displayBalance(user);
+                    break;
+                case 3:
+                    transferFunds(user);
+                    break;
+                case 4:
+                    displayTransactionHistory(user);
+                    break;
+                case 5:
+                    System.out.println("Logging out...");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
